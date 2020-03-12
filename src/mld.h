@@ -1,4 +1,6 @@
 #ifndef __MLD__
+#define __MLD__
+
 #include<assert.h>
 
 #define MAX_STRUCTURE_NAME_SIZE 128
@@ -40,7 +42,7 @@ struct _struct_db_rec{
 	char struct_name[MAX_STRUCTURE_NAME_SIZE]; //key
 	unsigned int ds_size;	//size of struct
 	unsigned int n_fields;	//n of fields in struct
-	field_info_t *field;	//pointer to array of fields
+	field_info_t *fields;	//pointer to array of fields
 };
 
 //Head of linked list representing the struct db
@@ -76,14 +78,14 @@ add_struct_to_struct_db(struct_db_t *struct_db, struct_db_rec_t *struct_rec);
 		strncpy(rec->struct_name, #st_name, MAX_STRUCTURE_NAME_SIZE);	\
 		rec->ds_size = sizeof(st_name);					\
 		rec->n_fields = sizeof(fields_arr)/sizeof(field_info_t);	\
-		rec->field = fields_arr;					\
+		rec->fields = fields_arr;					\
 		if(add_struct_to_struct_db(struct_db, rec)){			\
 			assert(0);						\
 		}								\
 	}while(0);
 
 //pointer to database, name of structure, pointer to array that stores fields info
-//create new struct db record 
+//create new struct db record
 //find size of structure db rec and n_fields
 //link with fields array
 //add struct db rec to struct db

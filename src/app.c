@@ -27,6 +27,10 @@ main(int argc, char **argv){
 
 	//Init a new structure database
 	struct_db_t *struct_db = calloc(1, sizeof(struct_db_t));
+	if(struct_db==NULL){
+        printf("struct_db calloc failed");
+        return 0;
+	}
 
 	//Create structure record for structure emp_t
 	static field_info_t emp_fields[] = {
@@ -48,6 +52,7 @@ main(int argc, char **argv){
 	REG_STRUCT(struct_db, student_t, stud_fields);
 
 	print_struct_db(struct_db);
+
 
 	return 0;
 }

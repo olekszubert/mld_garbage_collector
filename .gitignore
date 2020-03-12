@@ -1,1 +1,8 @@
 src/mld
+src/mld.cbp
+src/mld.depend
+src/mld.layout
+src/obj
+src/bin
+src/app.o
+src/mld.o
