@@ -54,5 +54,39 @@ main(int argc, char **argv){
 	print_struct_db(struct_db);
 
 
+
+
+
+    //init a new obj db
+    obj_db_t *obj_db = calloc(1, sizeof(obj_db_t));
+	if(obj_db==NULL){
+        printf("obj_db calloc failed");
+        return 0;
+	}
+    //associate obj_db with one struct_db
+    obj_db->struct_db = struct_db;
+
+    //create some sample objs, equivalent to standard
+    student_t *john = xcalloc(obj_db, "student_t", 1);
+    john->age=25;
+    john->aggregate=33.5;
+    john->best_colleage=NULL;
+    john->rollno=254;
+    strncpy(john->stud_name, "John Williams", strlen("John Williams"));
+
+    student_t *bob = xcalloc(obj_db, "student_t", 1);
+    bob->age=24;
+    bob->aggregate=35.5;
+    bob->best_colleage=NULL;
+    bob->rollno=253;
+    strncpy(bob->stud_name, "Bob Willis", strlen("Bob Willis"));
+
+    emp_t *rick = xcalloc(obj_db, "emp_t", 2);
+
+    print_obj_db(obj_db);
+
+
+
+
 	return 0;
 }

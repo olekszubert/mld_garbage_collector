@@ -18,13 +18,16 @@ print_struct_rec(struct_db_rec_t *struct_rec)
     //iterate field elements
     if(struct_rec==NULL) return;
 
-    printf("Struct name: %-14s, Size: %u, No of fields: %u\n", struct_rec->struct_name, struct_rec->ds_size, struct_rec->n_fields);
+    printf("Struct name: %-14s, Size: %u, No of fields: %u\n",
+           struct_rec->struct_name, struct_rec->ds_size,
+           struct_rec->n_fields);
 
     field_info_t *curr_field = NULL;
 
     for(int i=0; i<struct_rec->n_fields; i++){
         curr_field = &struct_rec->fields[i];
-        printf("Field name: %-15s, Size: %u, Offset: %u, Type: %s, Nested str name: %s\n",
+        printf("Field name: %-15s, Size: %u, Offset: %u, Type: %s, \
+               Nested str name: %s\n",
                curr_field->fname, curr_field->size, curr_field->offset,
                DATA_TYPE[curr_field->dtype], curr_field->nested_str_name);
     }
@@ -45,15 +48,11 @@ print_struct_db(struct_db_t *struct_db)
     }
 
     printf("Num of Struct Records: %u\n", struct_db->count);
-    //for(int i=0; curr_rec!=NULL; i++, curr_rec=curr_rec->next){
-    //    print_struct_rec(curr_rec);
-        int i=0;
-        while(curr_rec){
-        printf("\n\nstructure No : %d (%p)\n", i++, curr_rec);
+    for(int i=0; curr_rec!=NULL; i++, curr_rec=curr_rec->next){
+        printf("\n\nStruct #%d (%p)\n", i, curr_rec);
         print_struct_rec(curr_rec);
-        curr_rec = curr_rec->next;
-        }
-
+    }
+    printf("\n");
 }
 
 //add struct to struct db
@@ -82,7 +81,8 @@ add_struct_to_struct_db(struct_db_t *struct_db, struct_db_rec_t *struct_rec)
 }
 
 
-//function must return pointer to the structure record corresponding to the structure name passed as 2nd arg
+//function must return pointer to the structure record corresponding to the
+//structure name passed as 2nd arg
 //if record not found, return NULL
 
 static struct_db_rec_t*
@@ -103,8 +103,126 @@ struct_db_look_up(struct_db_t *struct_db, char *struct_name)
 }
 
 
+void
+print_obj_rec(obj_db_rec_t *obj_rec, int i){
+    printf("Enter print_obj_rec\n");
+
+    if(obj_rec==NULL) return;
 
 
+    printf("%-3d ptr = %-10p, next = %-10p, units = %-4d, struct_name = %-10s, "
+           "is_root = %s\n",
+         i, obj_rec->ptr, obj_rec->next, obj_rec->units,
+         obj_rec->struct_rec->struct_name, obj_rec->is_root ? "TRUE " : "FALSE");
+
+}
+
+void
+print_obj_db(obj_db_t *obj_db){
+    printf("Enter print_obj_db\n");
+
+	if(obj_db==NULL) return;//maybe add some error msg
+
+    obj_db_rec_t *curr_rec = obj_db->head;
+
+    if(curr_rec==NULL){
+            printf("curr_rec is null\n");
+    }
+
+    printf("Num of Obj Records: %u\n", obj_db->count);
+    for(int i=0; curr_rec!=NULL; i++, curr_rec=curr_rec->next){
+        printf("\n\nObject #%d (%p)\n", i, curr_rec);
+        print_obj_rec(curr_rec, i);
+    }
+    printf("\n");
+}
+
+
+
+static obj_db_rec_t*
+obj_db_look_up(obj_db_t *obj_db, void *ptr)
+{
+    printf("Enter obj_db_look_up\n");
+    //check if list empty
+    //iterate through list and compare rec key ptr against ptr
+    //compare ptrs normally
+    obj_db_rec_t *head = obj_db->head;
+    if(head==NULL){
+        printf("head==NULL\n");
+        return NULL;
+    }
+
+    printf("here...\n");
+    #if 0
+        if(head->ptr == ptr){
+            printf("return head;\n");
+            //return head;
+        }
+
+    }
+    #endif // 0for(; head; head->next){
+
+    printf("head==NULL(2)\n");
+    return NULL;
+}
+
+static void
+add_obj_to_obj_db(obj_db_t *obj_db,
+                  void* ptr,
+                  int units,
+                  struct_db_rec_t *struct_rec,
+                  mld_boolean_t is_root)
+{
+    printf("Enter add_obj_to_obj_db\n");
+    //from course: don't add same object twice
+    obj_db_rec_t *obj_rec = obj_db_look_up(obj_db, ptr);
+    if (obj_rec==NULL) printf("obj_rec is NULL\n");
+    assert(!obj_rec);
+
+    //allocate memory for a new obj record
+    //fill the new record with function arguments
+    //then like with struct, add record to linked list
+
+    obj_rec = calloc(1, sizeof(obj_db_rec_t));
+
+    obj_rec->next=NULL;
+    obj_rec->ptr=ptr;
+    obj_rec->struct_rec=struct_rec;
+    obj_rec->units=units;
+    obj_rec->is_visited = MLD_FALSE;
+    obj_rec->is_root = is_root;
+
+    obj_db_rec_t *head = obj_db->head;
+
+    if(head==NULL){
+        obj_rec->next=NULL;
+        obj_db->head=obj_rec;
+        obj_db->count++;
+        return;
+    }
+    obj_rec->next=head;
+    obj_db->head=obj_rec;
+    obj_db->count++;
+}
+
+void *
+xcalloc(obj_db_t *obj_db, char *struct_name, int units){
+    //create obj using calloc
+    //whatever it creates, add to obj db
+    //insert new obj to obj db (add_obj_to_obj_db(pointer to obj db,
+    //pointer to obj, units, pointer to struct rec)
+    printf("Enter xcalloc\n");
+
+    struct_db_rec_t *struct_rec = struct_db_look_up(obj_db->struct_db,
+                                                    struct_name);
+    assert(struct_rec);
+
+    void *ptr = calloc(units, struct_rec->ds_size);
+
+    add_obj_to_obj_db(obj_db, ptr, units, struct_rec, MLD_FALSE);
+
+    return ptr;
+}
 
 
 

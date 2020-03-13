@@ -25,6 +25,11 @@ typedef enum {
 	OBJ_STRUCT
 } data_type_t;
 
+typedef enum{
+    MLD_FALSE,
+    MLD_TRUE
+} mld_boolean_t;
+
 //Structure to store info of one field of a C struct
 typedef struct {
 	char fname[MAX_FIELD_NAME_SIZE];
@@ -34,16 +39,14 @@ typedef struct {
 	char nested_str_name[MAX_STRUCTURE_NAME_SIZE];//for dtype=OBJ_PTR or OBJ_STRUCT
 } field_info_t;
 
-typedef struct _struct_db_rec struct_db_rec_t;
-
 //Structure to store info of on C struct with n fields
-struct _struct_db_rec{
-	struct_db_rec_t *next;	//pointer to next struct - linked list
+typedef struct _struct_db_rec{
+	struct _struct_db_rec *next;	//pointer to next struct - linked list
 	char struct_name[MAX_STRUCTURE_NAME_SIZE]; //key
 	unsigned int ds_size;	//size of struct
 	unsigned int n_fields;	//n of fields in struct
 	field_info_t *fields;	//pointer to array of fields
-};
+}struct_db_rec_t;
 
 //Head of linked list representing the struct db
 typedef struct _struct_db{
@@ -90,13 +93,54 @@ add_struct_to_struct_db(struct_db_t *struct_db, struct_db_rec_t *struct_rec);
 //link with fields array
 //add struct db rec to struct db
 
+
+
+
+
+
+
+
+
+
+
+
+
+//typedef struct _object_db_rec object_db_rec_t;
+
+typedef struct _obj_db_rec{
+    struct _obj_db_rec *next;
+    void *ptr; //key
+    unsigned int units; //num of units of obj that has been malloced (for continuous mem alloc)
+    struct_db_rec_t *struct_rec; //pointer to struct rec that object is init'd based on
+    mld_boolean_t is_visited; /*Used for Graph traversal*/
+    mld_boolean_t is_root;    /*Is this object is Root object*/
+}obj_db_rec_t;
+
+typedef struct {
+    struct_db_t *struct_db; //model after struct db
+    obj_db_rec_t *head;
+    unsigned int count;
+} obj_db_t;
+
+
+void
+print_obj_rec(obj_db_rec_t *obj_rec, int i);
+
+void
+print_obj_db(obj_db_t *obj_db);
+
+//own calloc
+void *
+xcalloc(obj_db_t *obj_db, char *struct_name, int units);
+
+// emp_t *emp = xcalloc(object_db, "emp_t", 1);
+//allocate 'units' of units of memory for object of type "stuct_name"
+//create the obj record for new allocated object and add the obj record to db
+//link the object record with struc record for struct "struct_name"
+//return pointer to the allocated object
+//allocate memory and create internal data structure in MLD lib so MLD can keep track of allocated objects
+
+
+
 #endif /* __MLD__ */
-
-
-
-
-
-
-
-
 
