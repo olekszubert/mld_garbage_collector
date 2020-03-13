@@ -109,12 +109,10 @@ print_obj_rec(obj_db_rec_t *obj_rec, int i){
 
     if(obj_rec==NULL) return;
 
-
     printf("%-3d ptr = %-10p, next = %-10p, units = %-4d, struct_name = %-10s, "
            "is_root = %s\n",
          i, obj_rec->ptr, obj_rec->next, obj_rec->units,
          obj_rec->struct_rec->struct_name, obj_rec->is_root ? "TRUE " : "FALSE");
-
 }
 
 void
@@ -223,6 +221,81 @@ xcalloc(obj_db_t *obj_db, char *struct_name, int units){
 
     return ptr;
 }
+
+
+
+
+
+static void print_obj_rec_data(obj_db_rec_t *obj_rec)
+{
+    printf("Ender print_obj_rec_data\n");
+
+    //work in progress
+    int n_fields = obj_rec->struct_rec->n_fields;
+    field_info_t *field = NULL;
+
+    int units = obj_rec->units, obj_index = 0,
+        field_index = 0;
+
+    for(; obj_index < units; obj_index++){
+        char *current_object_ptr = (char *)(obj_rec->ptr) + \
+                        (obj_index * obj_rec->struct_rec->ds_size);
+
+        for(field_index = 0; field_index < n_fields; field_index++){
+
+            field = &obj_rec->struct_rec->fields[field_index];
+
+            switch(field->dtype){
+                case UINT8:
+                case INT32:
+                case UINT32:
+                    printf("%s[%d]->%s = %d\n", obj_rec->struct_rec->struct_name,
+                           obj_index, field->fname,
+                           *(int *)(current_object_ptr + field->offset));
+                    break;
+                case CHAR:
+                    printf("%s[%d]->%s = %s\n", obj_rec->struct_rec->struct_name,
+                           obj_index, field->fname,
+                           (char *)(current_object_ptr + field->offset));
+                    break;
+                case FLOAT:
+                    printf("%s[%d]->%s = %f\n", obj_rec->struct_rec->struct_name,
+                           obj_index, field->fname,
+                           *(float *)(current_object_ptr + field->offset));
+                    break;
+                case DOUBLE:
+                    printf("%s[%d]->%s = %f\n", obj_rec->struct_rec->struct_name,
+                           obj_index, field->fname,
+                           *(double *)(current_object_ptr + field->offset));
+                    break;
+                case OBJ_PTR:
+                    printf("%s[%d]->%s = %p\n", obj_rec->struct_rec->struct_name,
+                           obj_index, field->fname,
+                           (void *)*(int *)(current_object_ptr + field->offset));
+                    break;
+                case OBJ_STRUCT:
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+
+void
+print_obj_data(obj_db_t *obj_db){
+
+    int i=0;
+    obj_db_rec_t *head;
+
+    for(head = obj_db->head; head; head = head->next, i++){
+            print_obj_rec_data(head);
+    }
+}
+
+
+
 
 
 

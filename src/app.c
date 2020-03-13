@@ -85,8 +85,7 @@ main(int argc, char **argv){
 
     print_obj_db(obj_db);
 
-
-
+    print_obj_data(obj_db);
 
 	return 0;
 }
