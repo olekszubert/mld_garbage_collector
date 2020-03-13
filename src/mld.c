@@ -231,6 +231,7 @@ static void print_obj_rec_data(obj_db_rec_t *obj_rec)
     printf("Ender print_obj_rec_data\n");
 
     //work in progress
+
     int n_fields = obj_rec->struct_rec->n_fields;
     field_info_t *field = NULL;
 
