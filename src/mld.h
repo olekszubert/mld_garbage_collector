@@ -19,9 +19,9 @@ typedef enum {
 	UINT32,
 	INT32,
 	CHAR,
-	OBJ_PTR,
 	FLOAT,
 	DOUBLE,
+    OBJ_PTR,
 	OBJ_STRUCT
 } data_type_t;
 

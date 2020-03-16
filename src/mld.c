@@ -230,67 +230,73 @@ static void print_obj_rec_data(obj_db_rec_t *obj_rec)
 {
     printf("Ender print_obj_rec_data\n");
 
-    //work in progress
+    //print object records data
+    //objects of various types, therefore multiple print options...
 
     int n_fields = obj_rec->struct_rec->n_fields;
-    field_info_t *field = NULL;
+    int db_rec_size = obj_rec->struct_rec->ds_size;
 
-    int units = obj_rec->units, obj_index = 0,
-        field_index = 0;
+    int units = obj_rec->units;
+    int obj_index = 0, field_index = 0;
 
-    for(; obj_index < units; obj_index++){
-        char *current_object_ptr = (char *)(obj_rec->ptr) + \
-                        (obj_index * obj_rec->struct_rec->ds_size);
+    field_info_t *curr_field = NULL;
 
-        for(field_index = 0; field_index < n_fields; field_index++){
+    //iterate through objects
+    for(obj_index = 0; obj_index < units; obj_index++)
+    {
+        //conversion to byte for pointer arithmetic
+        //jump to next object record (same xcalloc) by adding db record size to offset
+        //in simple terms - iterate through units
+        char *curr_obj_ptr = (char *)(obj_rec->ptr) + (obj_index * db_rec_size);
 
-            field = &obj_rec->struct_rec->fields[field_index];
+        for(field_index = 0; field_index < n_fields; field_index++)
+        {
+            //iterate through db record fields
+            curr_field = &obj_rec->struct_rec->fields[field_index];
 
-            switch(field->dtype){
-                case UINT8:
-                case INT32:
-                case UINT32:
-                    printf("%s[%d]->%s = %d\n", obj_rec->struct_rec->struct_name,
-                           obj_index, field->fname,
-                           *(int *)(current_object_ptr + field->offset));
-                    break;
-                case CHAR:
-                    printf("%s[%d]->%s = %s\n", obj_rec->struct_rec->struct_name,
-                           obj_index, field->fname,
-                           (char *)(current_object_ptr + field->offset));
-                    break;
-                case FLOAT:
-                    printf("%s[%d]->%s = %f\n", obj_rec->struct_rec->struct_name,
-                           obj_index, field->fname,
-                           *(float *)(current_object_ptr + field->offset));
-                    break;
-                case DOUBLE:
-                    printf("%s[%d]->%s = %f\n", obj_rec->struct_rec->struct_name,
-                           obj_index, field->fname,
-                           *(double *)(current_object_ptr + field->offset));
-                    break;
-                case OBJ_PTR:
-                    printf("%s[%d]->%s = %p\n", obj_rec->struct_rec->struct_name,
-                           obj_index, field->fname,
-                           (void *)*(int *)(current_object_ptr + field->offset));
-                    break;
-                case OBJ_STRUCT:
-                    break;
-                default:
-                    break;
+            //printf struct name, obj index, field name, field data
+            //TODO fix this massive bug
+            switch(curr_field->dtype){
+            case UINT8:
+            case INT32:
+            case UINT32:
+                printf("%s[%u]->%s = %u\n", obj_rec->struct_rec->struct_name,
+                       obj_index, curr_field->fname,
+                       *(int*)(curr_obj_ptr + curr_field->offset));
+                break;
+            case CHAR:
+                printf("%s[%u]->%s = %s\n", obj_rec->struct_rec->struct_name,
+                       obj_index, curr_field->fname,
+                       (char*)(curr_obj_ptr + curr_field->offset));
+                break;
+            case FLOAT:
+            case DOUBLE:
+                printf("%s[%u]->%s = %f\n", obj_rec->struct_rec->struct_name,
+                       obj_index, curr_field->fname,
+                       *(double*)(curr_obj_ptr + curr_field->offset));
+                break;
+            case OBJ_PTR:
+                printf("%s[%u]->%s = %u\n", obj_rec->struct_rec->struct_name,
+                       obj_index, curr_field->fname,
+                       (void*)*(int*)(curr_obj_ptr + curr_field->offset));
+                break;
+            case OBJ_STRUCT:
+                //TODO implement
+                break;
+            default:
+                printf("ERROR: Unsupported data type.\n");
+                break;
             }
         }
     }
 }
 
-
 void
 print_obj_data(obj_db_t *obj_db){
 
-    int i=0;
-    obj_db_rec_t *head;
+    obj_db_rec_t *head = obj_db->head;
 
-    for(head = obj_db->head; head; head = head->next, i++){
+    for(; head; head = head->next){
             print_obj_rec_data(head);
     }
 }
