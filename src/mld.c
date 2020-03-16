@@ -222,7 +222,39 @@ xcalloc(obj_db_t *obj_db, char *struct_name, int units){
     return ptr;
 }
 
+void
+xfree(obj_db_t *obj_db, void *ptr)
+{
+    printf("Enter xfree\n");
+    /*Application must invoke xfree() function and it should do the following:
+    1. assert if the ptr passed as argument to xfree is not found in obj db, if found:
+    2. remove the object record from object db (but do not free it)
+    3. finally free the actual object by invoking free(obj_rec->ptr)
+    4. free object rec which is removed from object db in step 2.*/
+    obj_db_rec_t *curr_rec = obj_db->head;
+    obj_db_rec_t *prev_rec = obj_db->head;
 
+    for(; curr_rec; curr_rec=curr_rec->next){
+
+        printf("curr_rec= %u, curr_rec->next = %u\n",
+                 (unsigned long)curr_rec,(unsigned long)curr_rec->next);
+
+        if(curr_rec->ptr == ptr){       //check if match
+            void *obj_ptr = curr_rec->ptr;   //create a local copy
+            if(curr_rec == obj_db->head){   //check if we're at 1st list element
+                obj_db->head = curr_rec->next;
+            }
+            assert(prev_rec);   //cant be null
+            prev_rec->next = curr_rec->next;
+            obj_db->count--;
+            free(obj_ptr);      //consider the remains in the memory
+            return;
+        }
+    prev_rec = curr_rec;
+    }
+    printf("Invalid pointa, boi\n");
+    assert(0);
+}
 
 
 

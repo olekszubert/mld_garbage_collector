@@ -129,7 +129,6 @@ print_obj_rec(obj_db_rec_t *obj_rec, int i);
 void
 print_obj_db(obj_db_t *obj_db);
 
-//own calloc
 void *
 xcalloc(obj_db_t *obj_db, char *struct_name, int units);
 
@@ -140,7 +139,8 @@ xcalloc(obj_db_t *obj_db, char *struct_name, int units);
 //return pointer to the allocated object
 //allocate memory and create internal data structure in MLD lib so MLD can keep track of allocated objects
 
-
+void
+xfree(obj_db_t *obj_db, void *ptr);
 
 #endif /* __MLD__ */
 

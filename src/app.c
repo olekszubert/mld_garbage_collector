@@ -87,5 +87,13 @@ main(int argc, char **argv){
 
     print_obj_data(obj_db);
 
+    xfree(obj_db, john);
+    xfree(obj_db, bob);
+    xfree(obj_db, rick);
+
+    print_obj_db(obj_db);
+
+    print_obj_data(obj_db);
+
 	return 0;
 }
