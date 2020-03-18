@@ -6,10 +6,9 @@
 #define MAX_STRUCTURE_NAME_SIZE 128
 #define MAX_FIELD_NAME_SIZE 128
 
+// address of element of a null structure is equal to its offset
 #define OFFSET_OF(struct_name, fld_name) \
 	(unsigned long)&(((struct_name *)0)->fld_name)
-
-// address of element of a null structure is equal to its offset
 
 #define FIELD_SIZE(struct_name, fld_name) \
 	sizeof(((struct_name *)0)->fld_name)
@@ -39,6 +38,7 @@ typedef struct {
 	char nested_str_name[MAX_STRUCTURE_NAME_SIZE];//for dtype=OBJ_PTR or OBJ_STRUCT
 } field_info_t;
 
+/*Structure definitions*/
 //Structure to store info of on C struct with n fields
 typedef struct _struct_db_rec{
 	struct _struct_db_rec *next;	//pointer to next struct - linked list
@@ -54,59 +54,7 @@ typedef struct _struct_db{
 	unsigned int count;
 } struct_db_t;
 
-
-//Printing functions
-void
-print_struct_rec (struct_db_rec_t *struct_rec);
-
-void
-print_struct_db(struct_db_t *struct_db);
-
-//Func to add struct rec to a struct db
-int
-add_struct_to_struct_db(struct_db_t *struct_db, struct_db_rec_t *struct_rec);
-
-
-//Structure Registration helping APIs
-
-#define FIELD_INFO(struct_name, fld_name, dtype, nested_struct_name)	\
-	{#fld_name, dtype, FIELD_SIZE(struct_name, fld_name), 		\
-	OFFSET_OF(struct_name, fld_name), #nested_struct_name}
-
-//# operator converts anything after it into a string
-
-#define REG_STRUCT(struct_db, st_name, fields_arr)				\
-	do{									\
-		struct_db_rec_t *rec = calloc(1, sizeof(struct_db_rec_t)); 	\
-		strncpy(rec->struct_name, #st_name, MAX_STRUCTURE_NAME_SIZE);	\
-		rec->ds_size = sizeof(st_name);					\
-		rec->n_fields = sizeof(fields_arr)/sizeof(field_info_t);	\
-		rec->fields = fields_arr;					\
-		if(add_struct_to_struct_db(struct_db, rec)){			\
-			assert(0);						\
-		}								\
-	}while(0);
-
-//pointer to database, name of structure, pointer to array that stores fields info
-//create new struct db record
-//find size of structure db rec and n_fields
-//link with fields array
-//add struct db rec to struct db
-
-
-
-
-
-
-
-
-
-
-
-
-
-//typedef struct _object_db_rec object_db_rec_t;
-
+/*Object definitions*/
 typedef struct _obj_db_rec{
     struct _obj_db_rec *next;
     void *ptr; //key
@@ -123,24 +71,65 @@ typedef struct {
 } obj_db_t;
 
 
-void
-print_obj_rec(obj_db_rec_t *obj_rec, int i);
+//Structure Registration helping APIs
+//# operator converts anything after it into a string
+#define FIELD_INFO(struct_name, fld_name, dtype, nested_struct_name)	\
+	{#fld_name, dtype, FIELD_SIZE(struct_name, fld_name), 		\
+	OFFSET_OF(struct_name, fld_name), #nested_struct_name}
 
-void
-print_obj_db(obj_db_t *obj_db);
 
-void *
-xcalloc(obj_db_t *obj_db, char *struct_name, int units);
+//pointer to database, name of structure, pointer to array that stores fields info
+//create new struct db record
+//find size of structure db rec and n_fields
+//link with fields array
+//add struct db rec to struct db
+#define REG_STRUCT(struct_db, st_name, fields_arr)				\
+	do{									\
+		struct_db_rec_t *rec = calloc(1, sizeof(struct_db_rec_t)); 	\
+		strncpy(rec->struct_name, #st_name, MAX_STRUCTURE_NAME_SIZE);	\
+		rec->ds_size = sizeof(st_name);					\
+		rec->n_fields = sizeof(fields_arr)/sizeof(field_info_t);	\
+		rec->fields = fields_arr;					\
+		if(add_struct_to_struct_db(struct_db, rec)){			\
+			assert(0);						\
+		}								\
+	}while(0);
+
+
+//Printing functions
+void print_struct_rec(struct_db_rec_t *struct_rec);
+void print_struct_db(struct_db_t *struct_db);
+void print_obj_rec(obj_db_rec_t *obj_rec, int i);
+void print_obj_db(obj_db_t *obj_db);
+void print_obj_data(obj_db_t *obj_db);
+
+//---
+int add_struct_to_struct_db(struct_db_t *struct_db,
+                            struct_db_rec_t *struct_rec);
 
 // emp_t *emp = xcalloc(object_db, "emp_t", 1);
 //allocate 'units' of units of memory for object of type "stuct_name"
 //create the obj record for new allocated object and add the obj record to db
 //link the object record with struc record for struct "struct_name"
 //return pointer to the allocated object
-//allocate memory and create internal data structure in MLD lib so MLD can keep track of allocated objects
+//allocate memory and create internal data structure in MLD lib so
+//MLD can keep track of allocated objects
+void* xcalloc(obj_db_t *obj_db, char *struct_name, int units);
+void xfree(obj_db_t *obj_db, void *ptr);
 
-void
-xfree(obj_db_t *obj_db, void *ptr);
+
+
+
+
+/* MLD */
+
+
+
+
+
+
+
+
 
 #endif /* __MLD__ */
 
