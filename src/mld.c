@@ -422,91 +422,6 @@ mld_explore_recursive(obj_db_t *obj_db, obj_db_rec_t *parent_obj_rec){
 }
 
 
-/* --------------- */
-
-/* Level 2 Pseudocode : This function explore the direct childs of obj_rec and mark
- * them visited. Note that obj_rec must have already visted.*/
-static void
-mld_explore_objects_recursively(object_db_t *object_db,
-                                object_db_rec_t *parent_obj_rec){
-
-    unsigned int i , n_fields;
-    char *parent_obj_ptr = NULL,
-         *child_obj_offset = NULL;
-    void *child_object_address = NULL;
-    field_info_t *field_info = NULL;
-
-    object_db_rec_t *child_object_rec = NULL;
-    struct_db_rec_t *parent_struct_rec = parent_obj_rec->struct_rec;
-
-    /*Parent object must have already visited*/
-    assert(parent_obj_rec->is_visited);
-
-    if(parent_struct_rec->n_fields == 0){
-        return;
-    }
-
-    for( i = 0; i < parent_obj_rec->units; i++){
-
-        parent_obj_ptr = (char *)(parent_obj_rec->ptr) + (i * parent_struct_rec->ds_size);
-
-        for(n_fields = 0; n_fields < parent_struct_rec->n_fields; n_fields++){
-
-            field_info = &parent_struct_rec->fields[n_fields];
-
-            /*We are only concerned with fields which are pointer to
-             * other objects*/
-            switch(field_info->dtype){
-                case UINT8:
-                case UINT32:
-                case INT32:
-                case CHAR:
-                case FLOAT:
-                case DOUBLE:
-                case OBJ_STRUCT:
-                    break;
-                case VOID_PTR:
-                case OBJ_PTR:
-                default:
-                    ;
-
-                /*child_obj_offset is the memory location inside parent object
-                 * where address of next level object is stored*/
-                child_obj_offset = parent_obj_ptr + field_info->offset;
-                memcpy(&child_object_address, child_obj_offset, sizeof(void *));
-
-                /*child_object_address now stores the address of the next object in the
-                 * graph. It could be NULL, Handle that as well*/
-                if(!child_object_address) continue;
-
-                child_object_rec = object_db_look_up(object_db, child_object_address);
-
-                assert(child_object_rec);
-                /* Since we are able to reach this child object "child_object_rec"
-                 * from parent object "parent_obj_ptr", mark this
-                 * child object as visited and explore its children recirsively.
-                 * If this child object is already visited, then do nothing - avoid infinite loops*/
-                if(!child_object_rec->is_visited){
-                    child_object_rec->is_visited = MLD_TRUE;
-                    if(field_info->dtype != VOID_PTR) /*Explore next object only when it is not a VOID_PTR*/
-                        mld_explore_objects_recursively(object_db, child_object_rec);
-                }
-                else{
-                    continue; /*Do nothing, explore next child object*/
-                }
-            }
-        }
-    }
-}
-
-
-/* --------------- */
-
-
-
-
-
-
 void
 run_mld_algorithm(obj_db_t *obj_db){
 
@@ -534,6 +449,18 @@ run_mld_algorithm(obj_db_t *obj_db){
 }
 
 
+
+
+
+/* primitive data types support */
+
+void
+mld_register_primitive_data_types(struct_db_t *struct_db){
+
+    REG_STRUCT(struct_db, int, 0);
+    REG_STRUCT(struct_db, float, 0);
+    REG_STRUCT(struct_db, double, 0);
+}
 
 
 

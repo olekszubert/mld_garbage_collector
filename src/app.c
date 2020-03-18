@@ -32,6 +32,9 @@ main(int argc, char **argv){
         return 0;
 	}
 
+    // primitive data types
+    mld_register_primitive_data_types(struct_db);
+
 	//Create structure record for structure emp_t
 	static field_info_t emp_fields[] = {
 		FIELD_INFO(emp_t, emp_name, CHAR, 0),
@@ -83,9 +86,18 @@ main(int argc, char **argv){
 
     emp_t *rick = xcalloc(obj_db, "emp_t", 2);
 
+    // primitive data types
+    //rick->last_6_salaries = xcalloc(obj_db, "int", 6);
+
     print_obj_db(obj_db);
 
     print_obj_data(obj_db);
+
+
+
+
+
+
 
     xfree(obj_db, john);
     xfree(obj_db, bob);
